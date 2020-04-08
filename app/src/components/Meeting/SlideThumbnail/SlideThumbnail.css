@@ -1,0 +1,7 @@
+.selected-bar {
+    background-color: #33b35a!important;
+    height: .25rem;
+}
+.slide-thumbnail {
+    max-width: 7rem;
+}
