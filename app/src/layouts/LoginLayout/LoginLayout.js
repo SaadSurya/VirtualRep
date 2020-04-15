@@ -10,7 +10,7 @@ const LoginLayout = ({ children }) => (
                 {children}
             </div>
             <div className="col-12 col-md-7 col-lg-6 col-xl-8 d-none d-lg-block">
-                <div style={{backgroundImage: 'url(img/photos/victor-ene-1301123-unsplash.jpg)'}} className="bg-cover h-100 mr-n3"></div>
+                <div style={{backgroundImage: 'url(/img/photos/conference-bridge.png)'}} className="bg-cover h-100 mr-n3"></div>
             </div>
         </div>
     </div>

@@ -8,6 +8,8 @@ import LoginLayoutRoute from './layouts/LoginLayout/LoginLayout';
 import AppLayoutRoute from './layouts/AppLayout/AppLayout';
 import PreviewLayoutRoute from './layouts/PreviewLayout/PreviewLayout';
 import Player from './components/Meeting/Player/Player';
+import Consent from './components/Meeting/Preview/Consent/Consent';
+import Logs from './components/Meeting/Logs/Logs';
 
 function App() {
   return (
@@ -19,8 +21,9 @@ function App() {
         <LoginLayoutRoute path="/login" component={Login} />
         <AppLayoutRoute path="/meetings" component={Meetings} />
         <AppLayoutRoute path="/meeting/player" component={Player} />
-        <PreviewLayoutRoute path="/meeting/preview" component={Preview} />
-        
+        <PreviewLayoutRoute path="/meeting/preview" exact component={Preview} />
+        <LoginLayoutRoute path="/meeting/preview/consent" component={Consent} />
+        <AppLayoutRoute path="/meeting/logs" component={Logs} />
       </Switch>
     </Router>
     // <Router>

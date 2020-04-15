@@ -1,0 +1,15 @@
+@use "sass:map";
+
+$theme-colors: (
+    "primary": #2b90d9
+);
+
+.primary-color {
+    color: map-get($theme-colors, "primary");
+}
+
+.primary-background {
+    background-color: map-get($theme-colors, "primary");
+}
+
+@import "~bootstrap/scss/bootstrap";

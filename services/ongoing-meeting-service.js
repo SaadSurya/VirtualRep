@@ -6,7 +6,7 @@ const initiateMeeting = (meetingId, username) => {
     console.log('initiate meeting called')
     const user = getUserByUsername(username);
     let meeting = getMeetingById(meetingId);
-    meeting = {...meeting, users:[user], initiator: user, startTime: new Date(), currentSlideId: 1}
+    meeting = {...meeting, users:[user], initiator: user, startTime: new Date()}
     //const meeting = { id: meetingId, users: [user], initiator: user, startTime: new Date(), currentSlideId: 1 }
     ongoing_meetings.push(meeting);
     return meeting;
@@ -30,7 +30,9 @@ const endMeeting = (meetingId) => {
 const changeSlide = (meetingId, slideId) => {
     console.log(ongoing_meetings);    
     const meeting = ongoing_meetings.find(meeting => meeting.id == meetingId);
-    meeting.currentSlideId = slideId;
+    if(meeting && meeting.slides) {
+        meeting.slides.forEach(slide => slide.isCurrent = slide.id == slideId ? true : false);
+    }
     return meeting;
 }
 

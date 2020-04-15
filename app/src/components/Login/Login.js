@@ -11,7 +11,8 @@ const Login = () => {
 
     return (
         <div className="w-100 py-5">
-            <div className="text-center"><img src="img/brand/brand-1.svg" alt="..." style={{ maxWidth: '6rem' }} className="img-fluid mb-4" />
+            <div className="text-center">
+                <img src="img/brand/elastix_logo_mini.png" alt="..." style={{ maxWidth: '6rem' }} className="img-fluid mb-4" />
                 <h1 className="display-4 mb-3">Sign in</h1>
             </div>
             <form className="form-validate">
@@ -36,11 +37,3 @@ const Login = () => {
 }
 
 export default Login;
-
-// <div>
-//             <input id="username" name="username" type="text" onChange={event => setUsername(event.target.value)} value={username} />
-//             <input id="password" name="password" type="text" onChange={event => setPassword(event.target.value)} value={password} />
-//             <Link to="/meetings" onClick={event => !username ? event.preventDefault() : SessionService.createSession(username)}>
-//                 <button type="submit">Sign In</button>
-//             </Link>
-//         </div>

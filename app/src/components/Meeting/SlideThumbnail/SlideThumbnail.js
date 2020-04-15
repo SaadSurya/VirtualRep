@@ -1,12 +1,13 @@
 import React, { } from 'react';
 import ApiService from '../../../services/api-service';
-import { SLIDE_TYPE } from '../../../services/slide-service'; 
+import { SLIDE_TYPE } from '../../../services/slide-service';
 
 import './SlideThumbnail.css'
+import { Card } from 'react-bootstrap';
 
 const SlideThumbnail = ({ slide, selectSlide, isSelected }) => {
     let thumbnailTemplate;
-    switch(slide.type){
+    switch (slide.type) {
         default:
         case SLIDE_TYPE._IMAGE:
             thumbnailTemplate = (
@@ -20,16 +21,18 @@ const SlideThumbnail = ({ slide, selectSlide, isSelected }) => {
             break;
         case SLIDE_TYPE._SURVEY:
             thumbnailTemplate = (
-                <span>Survey</span>
+                <div style={{padding: '1rem'}} className="text-center text-small">
+                    <span className="text-muted">{slide.survey.name}</span>
+                </div>
             )
     }
     return (
         <div className="slide-thumbnail">
             <div className="card" >
-                <div className="card-body" style={{ padding: 0 }} onClick={event => { selectSlide(slide.id) }}>
+                <div className="card-body" style={{ padding: 0 }} onClick={event => { selectSlide(slide) }}>
                     {thumbnailTemplate}
                 </div>
-                {isSelected ? <div className="selected-bar"></div> : null}
+                {isSelected ? <div className="selected-bar primary-background"></div> : null}
             </div>
         </div>
     )

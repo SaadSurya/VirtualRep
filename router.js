@@ -1,5 +1,6 @@
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var emailRouter = require('./routes/email');
 var meetingRouter = require('./routes/meeting-router');
 var path = require('path');
 
@@ -8,6 +9,7 @@ const router = {
 
         //app.use('/', indexRouter);
         app.use('/users', usersRouter);
+        app.use('/email', emailRouter);
         //app.use('/meeting', meetingRouter);
 
         /* GET React App */

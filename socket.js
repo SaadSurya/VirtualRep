@@ -36,7 +36,10 @@ const socket = {
                 console.log('slide-video-fullscreen-change');
                 socket.broadcast.to(meetingId).emit('slide-video-fullscreen-changed', { isFullscreen });
             });
-            
+            socket.on('slide-state-change', ({ meetingId, slideId, slideState }) => {
+                console.log('slide-state-change');
+                socket.broadcast.to(meetingId).emit('slide-state-changed', { slideId, slideState });
+            });
         });
         
     }

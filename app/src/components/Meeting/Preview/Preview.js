@@ -4,10 +4,11 @@ import io from 'socket.io-client';
 
 import './Preview.css';
 import ApiService from '../../../services/api-service';
-import MeetingService from '../../../services/meeting-service';
 import SessionService from '../../../services/session-service';
-import SlideThumbnail from '../SlideThumbnail/SlideThumbnail';
 import SlidePreview from '../SlidePreview/SlidePreview';
+import { Button } from 'react-bootstrap';
+import ActionBar from './ActionBar/ActionBar';
+import ControlBar from './ControlBar/ControlBar';
 
 let socket;
 
@@ -84,7 +85,7 @@ const Preview = ({ location }) => {
         <section style={{ padding: '0' }}>
             <div className="card">
                 <div className="card-header">
-                    <h6>Slide ({currentSlideId})</h6>
+                    <ControlBar />
                 </div>
                 <div className="card-body">
                     <SlidePreview
@@ -97,7 +98,9 @@ const Preview = ({ location }) => {
                         onVideoFullscreenChange={notifyVideoFullscreenChange}
                     ></SlidePreview>
                 </div>
-                <div className="card-footer"></div>
+                <div className="card-footer">
+                    <ActionBar />
+                </div>
             </div>
 
         </section>
