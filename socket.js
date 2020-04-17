@@ -1,5 +1,5 @@
 const socketio = require('socket.io');
-const { initiateMeeting, joinMeeting, endMeeting, changeSlide } = require('./services/ongoing-meeting-service');
+const { initiateMeeting, joinMeeting, endMeeting, changeSlide, setSlideState } = require('./services/ongoing-meeting-service');
 const socket = {
     configure: function (server) {
         const io = socketio(server);
@@ -16,9 +16,8 @@ const socket = {
                 //return callback();
             });
             socket.on('slide-change', ({ meetingId, currentSlideId }, callback) => {
-                const meeting = changeSlide(meetingId, currentSlideId);
-                socket.broadcast.to(meetingId).emit('slide-changed', { meetingId, currentSlideId });
-                callback(meeting);
+                const slide = changeSlide(meetingId, currentSlideId);
+                socket.broadcast.to(meetingId).emit('slide-changed', { currentSlideId, slideState: slide.state });
             });
             socket.on('slide-video-play', ({ meetingId }) => {
                 console.log('slide-video-play');
@@ -38,7 +37,13 @@ const socket = {
             });
             socket.on('slide-state-change', ({ meetingId, slideId, slideState }) => {
                 console.log('slide-state-change');
+                setSlideState(meetingId, slideId, slideState);
                 socket.broadcast.to(meetingId).emit('slide-state-changed', { slideId, slideState });
+            });
+            socket.on('meeting-end', ({ meetingId }) => {
+                console.log('meeting-end');
+                
+                socket.broadcast.to(meetingId).emit('meeting-ended', { });
             });
         });
         

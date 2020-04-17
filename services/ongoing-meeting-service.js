@@ -6,7 +6,7 @@ const initiateMeeting = (meetingId, username) => {
     console.log('initiate meeting called')
     const user = getUserByUsername(username);
     let meeting = getMeetingById(meetingId);
-    meeting = {...meeting, users:[user], initiator: user, startTime: new Date()}
+    meeting = { ...meeting, users: [user], initiator: user, startTime: new Date() }
     //const meeting = { id: meetingId, users: [user], initiator: user, startTime: new Date(), currentSlideId: 1 }
     ongoing_meetings.push(meeting);
     return meeting;
@@ -28,12 +28,30 @@ const endMeeting = (meetingId) => {
 }
 
 const changeSlide = (meetingId, slideId) => {
-    console.log(ongoing_meetings);    
+    console.log(ongoing_meetings);
     const meeting = ongoing_meetings.find(meeting => meeting.id == meetingId);
-    if(meeting && meeting.slides) {
-        meeting.slides.forEach(slide => slide.isCurrent = slide.id == slideId ? true : false);
+    let changedSlide;
+    if (meeting && meeting.slides) {
+        meeting.slides.forEach(slide => {
+            if (slide.id == slideId) {
+                slide.isCurrent = true;
+                changedSlide = slide;
+            } else {
+                slide.isCurrent = false;
+            }
+        });
     }
-    return meeting;
+    return changedSlide;
 }
 
-module.exports = { initiateMeeting, joinMeeting, endMeeting, changeSlide }
+const setSlideState = (meetingId, slideId, slideState) => {
+    const meeting = ongoing_meetings.find(meeting => meeting.id == meetingId);
+    if (meeting) {
+        const slide = meeting.slides.find(slide => slide.id == slideId);
+        if (slide) {
+            slide.state = slideState;
+        }
+    }
+}
+
+module.exports = { initiateMeeting, joinMeeting, endMeeting, changeSlide, setSlideState }

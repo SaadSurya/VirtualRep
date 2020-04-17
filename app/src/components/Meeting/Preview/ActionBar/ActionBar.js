@@ -6,7 +6,7 @@ import PVReportingModal from './PVReportingModal/PVReportingModal';
 import DownloadsModal from './DownloadsModal/DownloadsModal';
 import MedicalSurveyModal from './MedicalSurveyModal/MedicalSurveyModal';
 import RequestFormModal from './RequestFormModal/RequestFormModal';
-import RescheduleMeetingModal from './RescheduleMeetingModal/RescheduleMeetingModal';
+import ScheduleNextMeetingModal from './ScheduleNextMeetingModal/ScheduleNextMeetingModal';
 
 const ActionBar = () => {
 
@@ -26,8 +26,8 @@ const ActionBar = () => {
             <MedicalSurveyModal show={showMedicalSurvey} setShow={setShowMedicalSurvey} />
             <Button variant="outline-primary" onClick={() => setShowRequestForm(true)}>Request Form</Button>
             <RequestFormModal show={showRequestForm} setShow={setShowRequestForm} />
-            <Button variant="outline-primary" onClick={() => setShowRescheduleMeeting(true)}>Reschedule Meeting</Button>
-            <RescheduleMeetingModal show={showRescheduleMeeting} setShow={setShowRescheduleMeeting} />
+            <Button variant="outline-primary" onClick={() => setShowRescheduleMeeting(true)}>Schedule Next Meeting</Button>
+            <ScheduleNextMeetingModal show={showRescheduleMeeting} setShow={setShowRescheduleMeeting} />
         </div>
     );
 }

@@ -7,8 +7,9 @@ import SurveyPreview from './SurveyPreview/SurveyPreview';
 
 const SlidePreview = forwardRef(({ slide, slideState, onPlayVideo, onPauseVideo, onSeekVideo, onVideoFullscreenChange, onSlideStateChange }, ref) => {
     const [videoPlaying, setVideoPlaying] = useState(false);
-    const [slideTemplate, setSlideTemplate] = useState((<div>No preview available</div>));
-    //const [slideState, setSlideState] = useState(slideState);
+    //const [slideTemplate, setSlideTemplate] = useState((<div>No preview available</div>));
+    //const [currentSlideState, setCurrentSlideState] = useState(slideState);
+    
     let seeked = false;
     let isVideo = false;
     //console.log("Slide Preview Rendered");
@@ -59,21 +60,21 @@ const SlidePreview = forwardRef(({ slide, slideState, onPlayVideo, onPauseVideo,
             }
         }
     }))
-
-    useEffect(() => {
-        console.log(slide);
+    let slideTemplate = (<div>Loading, Please Wait...</div>);
+    //useEffect(() => {
+        //console.log(slide);
         if (slide) {
             let slideUrl = ApiService.getBaseUrl() + slide.url;
             switch (slide.type) {
                 default:
                 case SLIDE_TYPE._IMAGE:
-                    setSlideTemplate(
+                    slideTemplate = (
                         <img style={{ maxWidth: '100%', maxHeight: '100%' }} src={slideUrl} alt="Slide Preview" />
                     );
                     break;
                 case SLIDE_TYPE._VIDEO:
                     isVideo = true;
-                    setSlideTemplate(
+                    slideTemplate = (
                         <ReactPlayer
                             style={{ maxWidth: '100%', maxHeight: '100%' }}
                             ref={videoPlayer}
@@ -124,18 +125,23 @@ const SlidePreview = forwardRef(({ slide, slideState, onPlayVideo, onPauseVideo,
                     );
                     break;
                 case SLIDE_TYPE._SURVEY:
-                    const onSuverySubmit = (slideState) => {
-                        onSlideStateChange(slideState);
-                    }
-                    setSlideTemplate (
-                        <SurveyPreview slide={slide} onSubmit={onSuverySubmit}></SurveyPreview>
+
+                    slideTemplate = (
+                        <SurveyPreview key={slide.id} survey={slide.survey} currentSurveyState={slideState} onSlideStateChange={onSlideStateChange}></SurveyPreview>
                     );
             }
         }
-    }, [slide]);
+    //}, [slide]);
 
     useEffect(() => {
         console.log(slideState);
+        // //setCurrentSlideState(slideState);
+        // console.log(slideTemplate.props);
+        // if(slideTemplate.props.surveyState) {
+        //     slideTemplate.props.surveyState = slideState
+        // }
+        // console.log(slideTemplate.props);
+        // setSlideTemplate(slideTemplate);
     }, [slideState]);
 
     useEffect(() => {

@@ -29,7 +29,7 @@ const SlideThumbnail = ({ slide, selectSlide, isSelected }) => {
     return (
         <div className="slide-thumbnail">
             <div className="card" >
-                <div className="card-body" style={{ padding: 0 }} onClick={event => { selectSlide(slide) }}>
+                <div className="card-body" style={{ padding: 0, cursor: 'pointer' }} onClick={event =>  selectSlide ? selectSlide(slide) : null}>
                     {thumbnailTemplate}
                 </div>
                 {isSelected ? <div className="selected-bar primary-background"></div> : null}

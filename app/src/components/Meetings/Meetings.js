@@ -6,11 +6,11 @@ import SessionService from '../../services/session-service';
 const Meetings = () => {
   return (
     <div>
-      <div class="breadcrumb-holder">
-        <div class="container-fluid">
-          <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/meetings">Home</a></li>
-            <li class="breadcrumb-item active">Meetings</li>
+      <div className="breadcrumb-holder">
+        <div className="container-fluid">
+          <ul className="breadcrumb">
+            <li className="breadcrumb-item"><a href="/meetings">Home</a></li>
+            <li className="breadcrumb-item active">Meetings</li>
           </ul>
         </div>
       </div>

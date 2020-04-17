@@ -12,7 +12,7 @@ const Login = () => {
     return (
         <div className="w-100 py-5">
             <div className="text-center">
-                <img src="img/brand/elastix_logo_mini.png" alt="..." style={{ maxWidth: '6rem' }} className="img-fluid mb-4" />
+                <img src="img/brand/Vfield.png" alt="..." style={{ maxWidth: '10rem' }} className="img-fluid mb-4" />
                 <h1 className="display-4 mb-3">Sign in</h1>
             </div>
             <form className="form-validate">
@@ -32,6 +32,13 @@ const Login = () => {
                 <button className="btn btn-lg btn-block btn-primary mb-3" onClick={event => { if (!username) { event.preventDefault() } else { SessionService.createSession(username); push('/meetings') } }} >Sign in</button>
                 <p className="text-center"><small className="text-muted text-center">Don't have an account yet? <a href="register-2.html">Register</a>.</small></p>
             </form>
+            <br />
+            <br />
+            {/* <div className="form-group">
+                <label>Technology Partners: </label><br />
+                <img src="/img/brand/elastix_logo_mini.png" alt="..." style={{ maxWidth: '8rem' }} className="img-fluid mb-4 align-item-right-side" />
+                <img src="/img/brand/ZRlogo.png" alt="..." style={{ maxWidth: '6rem' }} className="img-fluid mb-4 align-item-right-side" />
+            </div> */}
         </div>
     )
 }

@@ -1,0 +1,12 @@
+nav.navbar, nav.navbar a.menu-btn, .side-navbar, .side-navbar .sidenav-header {
+    background-color: #2b90d9;
+}
+.side-navbar li a:focus, .side-navbar li a:hover, .side-navbar li a[aria-expanded="true"] {
+    background-color: #292929;
+}
+nav.navbar a.menu-btn:hover {
+    background-color: #292929;
+}
+.sidenav-header-logo a, .sidenav-header-logo a strong.text-primary {
+    color: white !important;
+}

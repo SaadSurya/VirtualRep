@@ -10,11 +10,13 @@ import PreviewLayoutRoute from './layouts/PreviewLayout/PreviewLayout';
 import Player from './components/Meeting/Player/Player';
 import Consent from './components/Meeting/Preview/Consent/Consent';
 import Logs from './components/Meeting/Logs/Logs';
+import ThankYou from './components/Meeting/Preview/ThankYou/ThankYou';
 
 function App() {
   return (
     <Router>
       <Switch>
+        <Route path="/meeting/preview/thankyou" component={ThankYou} />
         <Route exact path="/">
           <Redirect to="/login" />
         </Route>

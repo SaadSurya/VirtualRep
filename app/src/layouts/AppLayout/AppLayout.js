@@ -45,7 +45,7 @@ const AppLayout = ({ children, ...rest }) => {
                 <a href="#">
                   <img src="/img/avatar-12.jpg" alt="person" className="img-fluid rounded-circle" />
                 </a>
-                <h2 className="h5">Ali Imran</h2><span>Medical Information Officer</span>
+                <h2 className="h5">Ali Imran</h2><span className="text-white">Medical Information Officer</span>
               </div>
               <div className="sidenav-header-logo"><a href={window.location} className="brand-small text-center"> <strong>V</strong><strong className="text-primary">F</strong></a></div>
             </div>

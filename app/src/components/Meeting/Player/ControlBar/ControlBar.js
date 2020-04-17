@@ -5,13 +5,15 @@ import './ControlBar.css';
 import SendEmailModal from './SendEmail/SendEmailModal';
 import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import FeedbackModal from './Feedback/FeedbackModal';
 
 
-const ControlBar = () => {
+const ControlBar = ( { onEnd }) => {
 
     const [isVideo, setIsVideo] = useState(false);
     const [isAudio, setIsAudio] = useState(false);
     const [showSendEmail, setShowSendEmail] = useState(false);
+    const [showFeedback, setShowFeedback] = useState(false);
 
     const toggleVideo = () => {
         setIsVideo(!isVideo);
@@ -19,11 +21,7 @@ const ControlBar = () => {
     const toggleAudio = () => {
         setIsAudio(!isAudio);
     }
-    const endMeeting = () => {
-        if(window.confirm('Are you sure to end meeting?')) {
-            window.location.href = '/meeting/logs';
-        }
-    }
+    
 
     return (
         <div>
@@ -33,8 +31,8 @@ const ControlBar = () => {
                 <SendEmailModal show={showSendEmail} setShow={setShowSendEmail} />
                 <Button size="sm" variant="outline-primary" onClick={toggleAudio}><FontAwesomeIcon icon={isAudio ? faMicrophone : faMicrophoneSlash} /></Button>
                 <Button size="sm" variant="outline-primary" onClick={toggleVideo}><FontAwesomeIcon icon={isVideo ? faVideo : faVideoSlash} /></Button>
-                <Button size="sm" variant="danger" onClick={endMeeting}><FontAwesomeIcon  icon={faPowerOff} /></Button>
-                
+                <Button size="sm" variant="danger" onClick={() => setShowFeedback(true)}><FontAwesomeIcon  icon={faPowerOff} /></Button>
+                <FeedbackModal show={showFeedback} setShow={setShowFeedback} onSubmit={onEnd} />
             </div>
         </div>
     );

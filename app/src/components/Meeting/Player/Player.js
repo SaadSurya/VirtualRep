@@ -16,10 +16,18 @@ let socket;
 const Player = ({ location }) => {
 
     const [meetingId, setMeetingId] = useState("");
-    const [meeting, setMeeting] = useState({ slides: [] });
+    const [meeting, setMeeting] = useState(null);
     const [currentSlide, setCurrentSlide] = useState(null);
     const [currentSlideState, setCurrentSlideState] = useState({});
     
+    const meetingRef = useRef(null);
+    const currentSlideRef = useRef(null);
+    const currentSlideStateRef = useRef({});
+
+    meetingRef.current = meeting;
+    currentSlideRef.current = currentSlide;
+    currentSlideStateRef.current = currentSlideState;
+
     const ENDPOINT = ApiService.getBaseUrl();
 
     const slidePreview = useRef(null);
@@ -42,11 +50,12 @@ const Player = ({ location }) => {
                 console.log(text);
                 //alert(text);
             })
-            socket.on('slide-changed', ({ currentSlideId }, callback) => {
+            socket.on('slide-changed', ({ currentSlideId, slideState}, callback) => {
                 console.log('slide-changed', currentSlideId);
-                meeting.slides.forEach(slide => {
+                meetingRef.current.slides.forEach(slide => {
                     if (slide.id == currentSlideId) {
                         slide.isCurrent = true;
+                        slide.state = slideState || {};
                         setCurrentSlide(slide);
                         setCurrentSlideState(slide.state);
                     } else {
@@ -54,26 +63,25 @@ const Player = ({ location }) => {
                     }
                 });
             });
-            // socket.on('slide-video-played', ({ }, callback) => {
-            //     console.log('slide-video-played', slidePreview);
-            //     slidePreview.current.playVideo(false);
-            // })
-            // socket.on('slide-video-paused', ({ }, callback) => {
-            //     console.log('slide-video-paused', slidePreview);
-            //     slidePreview.current.pauseVideo(false);
-            // })
-            // socket.on('slide-video-fullscreen-changed', ({ isFullscreen }, callback) => {
-            //     console.log('slide-video-fullscreen-changed', isFullscreen);
-            //     //slidePreview.current.videoFullscreen(isFullscreen);
-            // })
-            // socket.on('slide-video-seeked', ({ seconds }, callback) => {
-            //     console.log('slide-video-seeked', seconds);
-            //     slidePreview.current.seekVideo(seconds);
-            // })
+            socket.on('slide-video-played', ({ }, callback) => {
+                console.log('slide-video-played', slidePreview);
+                slidePreview.current.playVideo(false);
+            })
+            socket.on('slide-video-paused', ({ }, callback) => {
+                console.log('slide-video-paused', slidePreview);
+                slidePreview.current.pauseVideo(false);
+            })
+            socket.on('slide-video-fullscreen-changed', ({ isFullscreen }, callback) => {
+                console.log('slide-video-fullscreen-changed', isFullscreen);
+                //slidePreview.current.videoFullscreen(isFullscreen);
+            })
+            socket.on('slide-video-seeked', ({ seconds }, callback) => {
+                console.log('slide-video-seeked', seconds);
+                slidePreview.current.seekVideo(seconds);
+            })
             socket.on('slide-state-changed', ({ slideId, slideState }) => {
                 console.log('slide-state-changed', slideId, slideState);
-                //slidePreview.current.changeSlideState({ slideId, slideState });
-                // setCurrentSlideState(slideState)
+                setCurrentSlideState(slideState || {})
                 // const slide = meeting.slides.find(slide => slide.id == slideId);
                 // if (slide) {
                 //     slide.state = slideState;
@@ -83,26 +91,43 @@ const Player = ({ location }) => {
         }
     }, []);
 
-    // const notifyPlayVideo = () => {
-    //     socket.emit('slide-video-play', ({ meetingId }));
-    // }
-    // const notifyPauseVideo = () => {
-    //     socket.emit('slide-video-pause', ({ meetingId }));
-    // }
-    // const notifySeekVideo = (seconds) => {
-    //     socket.emit('slide-video-seek', ({ meetingId, seconds }));
-    // }
-    // const notifyVideoFullscreenChange = (isFullscreen) => {
-    //     socket.emit('slide-video-fullscreen-change', ({ meetingId, isFullscreen }));
-    // }
+    useEffect(() => {
+        if(currentSlide && currentSlide.state)
+            setCurrentSlideState(currentSlide.state);
+    }, [currentSlide]);
+
+    useEffect(() => {
+        if(currentSlideState && currentSlide)
+            currentSlide.state = currentSlideState;
+            setCurrentSlide(currentSlide);
+    }, [currentSlideState]);
+
+    const notifyPlayVideo = () => {
+        socket.emit('slide-video-play', ({ meetingId }));
+    }
+    const notifyPauseVideo = () => {
+        socket.emit('slide-video-pause', ({ meetingId }));
+    }
+    const notifySeekVideo = (seconds) => {
+        socket.emit('slide-video-seek', ({ meetingId, seconds }));
+    }
+    const notifyVideoFullscreenChange = (isFullscreen) => {
+        socket.emit('slide-video-fullscreen-change', ({ meetingId, isFullscreen }));
+    }
     const notifySlideChange = (id) => {
         socket.emit('slide-change', { meetingId, currentSlideId: id }, (meeting) => {
 
         });
     }
     const notifySlideStateChange = (slideState) => {
-
+        setCurrentSlideState(slideState);
+        console.log('notify slide state change called.');
         socket.emit('slide-state-change', { meetingId, slideId: currentSlide.id, slideState }, (response) => {
+            console.log(response);
+        });
+    }
+    const notifyMeetingEnd = () => {
+        socket.emit('meeting-end', { meetingId }, (response) => {
             console.log(response);
         });
     }
@@ -111,7 +136,6 @@ const Player = ({ location }) => {
         notifySlideChange(slide.id);
     }
 
-    useState(() => { console.log("Meeting Changed", meeting) }, [meeting]);
     return (
         <section style={{ height: 'calc(100vh - 65px)' }}>
             <div className="container-fluid h-100" style={{ padding: '1rem 1rem' }}>
@@ -119,24 +143,23 @@ const Player = ({ location }) => {
                     <div className="col-md-10 col-sm-10 h-100">
                         <div className="card h-100">
                             <div className="card-header card-header-sm">
-                                <ControlBar />
+                                <ControlBar onEnd={notifyMeetingEnd} />
                             </div>
                             <div className="card-body">
                                 <div className="container h-100">
                                     <SlidePreview
                                         ref={slidePreview}
                                         slide={currentSlide}
-                                        slideState={currentSlideState}      
+                                        slideState={currentSlideState}
                                         onSlideStateChange={notifySlideStateChange}
-                                    ></SlidePreview>
-                                    {/* onPlayVideo={notifyPlayVideo}
+                                        onPlayVideo={notifyPlayVideo}
                                         onPauseVideo={notifyPauseVideo}
                                         onSeekVideo={notifySeekVideo}
-                                        onVideoFullscreenChange={notifyVideoFullscreenChange} */}
+                                        onVideoFullscreenChange={notifyVideoFullscreenChange}
+                                    ></SlidePreview>
                                 </div>
                             </div>
                             <div className="card-footer card-header-sm">
-                                {/* <Link target="blank" to={`/meeting/preview?id=${id}`}>Preview</Link> */}
                             </div>
                         </div>
                     </div>

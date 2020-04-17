@@ -5,7 +5,7 @@ import { Modal, Button, ListGroup, Col, Tab, Row, Sonnet, Card, Form } from 'rea
 import EmailEditor from './EmailEditor/EmailEditor';
 
 const SendEmailModal = ({ show, setShow }) => {
-
+    console.log(window.location);
     const submit = () => {
         setShow(false);
     };
@@ -41,7 +41,14 @@ const SendEmailModal = ({ show, setShow }) => {
                                         defaultTo="doctor@doctors.com"
                                         defaultCc="supervisor@tranz.com"
                                         defaultSubject="Meeting Invitation"
-                                        defaultBody={"Dear Doctor,\n\nPlease join meeting.\n\nhttps://vfield.tranz-life.com/meeting/preview/consent?id=1\n\nRegards,\nRepresentative"}
+                                        defaultBody={
+                                            "Dear Doctor,\n\n" +
+                                            "Please join our digital detailing platform powered by eFiled for latest updates on products and diseases. Our representative will shortly give you a remote presentation on the subject.\n"+
+                                            "Permission Form,\n"+
+                                            "By clicking  below “start activity” button,  I do confirm that I accept to receive remote internet and telephone based presentations by representative from Tranz-Life Pvt Ltd.\n\n"+
+                                            window.location.origin+"/meeting/preview/consent?id=1\n\n"+
+                                            "Regards,\nRepresentative"
+                                        }
                                         onSend={() => setShow(false)}
                                     />
                                 </Tab.Pane>
