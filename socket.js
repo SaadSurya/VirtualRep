@@ -6,12 +6,12 @@ const socket = {
         io.on('connection', (socket) => {
             socket.on('join', ({ username, meetingId }, callback) => {
                 console.log('Welcome to meeting!');
-                if(!username){
+                if (!username) {
                     username = 'anonymous';
                 }
                 const meeting = joinMeeting(meetingId, username);
                 socket.join(meetingId);
-                socket.broadcast.to(meetingId).emit('notification', { text: `${username} has joined the meeting.` });
+                socket.broadcast.to(meetingId).emit('notification', { data: { socketId: socket.id }, text: `${username} has joined the meeting.` });
                 callback(meeting);
                 //return callback();
             });
@@ -42,11 +42,23 @@ const socket = {
             });
             socket.on('meeting-end', ({ meetingId }) => {
                 console.log('meeting-end');
-                
-                socket.broadcast.to(meetingId).emit('meeting-ended', { });
+
+                socket.broadcast.to(meetingId).emit('meeting-ended', {});
             });
+            socket.on('make-offer', function (data) {
+                socket.to(data.to).emit('offer-made', {
+                    offer: data.offer,
+                    socket: socket.id
+                });
+            });
+            socket.on('make-answer', function (data) {
+                socket.to(data.to).emit('answer-made', {
+                  socket: socket.id,
+                  answer: data.answer
+                });
+              });
         });
-        
+
     }
 }
 

@@ -5,11 +5,11 @@ import { SLIDE_TYPE } from '../../../services/slide-service';
 import ApiService from '../../../services/api-service';
 import SurveyPreview from './SurveyPreview/SurveyPreview';
 
-const SlidePreview = forwardRef(({ slide, slideState, onPlayVideo, onPauseVideo, onSeekVideo, onVideoFullscreenChange, onSlideStateChange }, ref) => {
+const SlidePreview = forwardRef(({ user, slide, slideState, onPlayVideo, onPauseVideo, onSeekVideo, onVideoFullscreenChange, onSlideStateChange }, ref) => {
     const [videoPlaying, setVideoPlaying] = useState(false);
     //const [slideTemplate, setSlideTemplate] = useState((<div>No preview available</div>));
     //const [currentSlideState, setCurrentSlideState] = useState(slideState);
-    
+
     let seeked = false;
     let isVideo = false;
     //console.log("Slide Preview Rendered");
@@ -62,75 +62,79 @@ const SlidePreview = forwardRef(({ slide, slideState, onPlayVideo, onPauseVideo,
     }))
     let slideTemplate = (<div>Loading, Please Wait...</div>);
     //useEffect(() => {
-        //console.log(slide);
-        if (slide) {
-            let slideUrl = ApiService.getBaseUrl() + slide.url;
-            switch (slide.type) {
-                default:
-                case SLIDE_TYPE._IMAGE:
-                    slideTemplate = (
-                        <img style={{ maxWidth: '100%', maxHeight: '100%' }} src={slideUrl} alt="Slide Preview" />
-                    );
-                    break;
-                case SLIDE_TYPE._VIDEO:
-                    isVideo = true;
-                    slideTemplate = (
-                        <ReactPlayer
-                            style={{ maxWidth: '100%', maxHeight: '100%' }}
-                            ref={videoPlayer}
-                            url={slideUrl}
-                            controls
-                            playing={videoPlaying}
-                            onReady={() => {
-                                // console.log('calling vp setter', videoPlayerSetter)
-                                //     videoPlayerSetter(videoPlayer);
-                                if (slide.videoPlayed && !seeked) {
-                                    seeked = true;
-                                    videoPlayer.current.seekTo(slide.videoPlayed, 'seconds');
+    //console.log(slide);
+    if (user) {
+        slideTemplate = (
+        <div>{user}</div>
+        )
+    } else if (slide) {
+        let slideUrl = ApiService.getBaseUrl() + slide.url;
+        switch (slide.type) {
+            default:
+            case SLIDE_TYPE._IMAGE:
+                slideTemplate = (
+                    <img style={{ maxWidth: '100%', maxHeight: '100%' }} src={slideUrl} alt="Slide Preview" />
+                );
+                break;
+            case SLIDE_TYPE._VIDEO:
+                isVideo = true;
+                slideTemplate = (
+                    <ReactPlayer
+                        style={{ maxWidth: '100%', maxHeight: '100%' }}
+                        ref={videoPlayer}
+                        url={slideUrl}
+                        controls
+                        playing={videoPlaying}
+                        onReady={() => {
+                            // console.log('calling vp setter', videoPlayerSetter)
+                            //     videoPlayerSetter(videoPlayer);
+                            if (slide.videoPlayed && !seeked) {
+                                seeked = true;
+                                videoPlayer.current.seekTo(slide.videoPlayed, 'seconds');
+                            }
+                        }}
+                        onSeek={
+                            (seconds) => {
+                                if (videoPlaying) {
+                                    ref.current.donotNotifyPause = true;
+                                    ref.current.donotNotifyPlay = true;
                                 }
-                            }}
-                            onSeek={
-                                (seconds) => {
-                                    if (videoPlaying) {
-                                        ref.current.donotNotifyPause = true;
-                                        ref.current.donotNotifyPlay = true;
-                                    }
-                                    seeked = true;
-                                    if (!ref.current.donotNotifySeek) {
-                                        onSeekVideo(seconds);
-                                    } else {
-                                        ref.current.donotNotifySeek = false;
-                                    }
+                                seeked = true;
+                                if (!ref.current.donotNotifySeek) {
+                                    onSeekVideo(seconds);
+                                } else {
+                                    ref.current.donotNotifySeek = false;
                                 }
                             }
-                            onProgress={({ played, playedSeconds }) => slide.videoPlayed = playedSeconds}
-                            onPlay={() => {
-                                console.log('onPlay start', ref.current.donotNotifyPlay);
-                                if (!ref.current.donotNotifyPlay) {
-                                    onPlayVideo();
-                                } else {
-                                    ref.current.donotNotifyPlay = false;
-                                }
-                                console.log('onPlay end', ref.current.donotNotifyPlay);
-                            }}
-                            onPause={() => {
-                                console.log('onPause start', ref.current.donotNotifyPause);
-                                if (!ref.current.donotNotifyPause) {
-                                    onPauseVideo();
-                                } else {
-                                    ref.current.donotNotifyPause = false;
-                                }
-                                console.log('onPause end', ref.current.donotNotifyPause);
-                            }}></ReactPlayer>
-                    );
-                    break;
-                case SLIDE_TYPE._SURVEY:
+                        }
+                        onProgress={({ played, playedSeconds }) => slide.videoPlayed = playedSeconds}
+                        onPlay={() => {
+                            console.log('onPlay start', ref.current.donotNotifyPlay);
+                            if (!ref.current.donotNotifyPlay) {
+                                onPlayVideo();
+                            } else {
+                                ref.current.donotNotifyPlay = false;
+                            }
+                            console.log('onPlay end', ref.current.donotNotifyPlay);
+                        }}
+                        onPause={() => {
+                            console.log('onPause start', ref.current.donotNotifyPause);
+                            if (!ref.current.donotNotifyPause) {
+                                onPauseVideo();
+                            } else {
+                                ref.current.donotNotifyPause = false;
+                            }
+                            console.log('onPause end', ref.current.donotNotifyPause);
+                        }}></ReactPlayer>
+                );
+                break;
+            case SLIDE_TYPE._SURVEY:
 
-                    slideTemplate = (
-                        <SurveyPreview key={slide.id} survey={slide.survey} currentSurveyState={slideState} onSlideStateChange={onSlideStateChange}></SurveyPreview>
-                    );
-            }
+                slideTemplate = (
+                    <SurveyPreview key={slide.id} survey={slide.survey} currentSurveyState={slideState} onSlideStateChange={onSlideStateChange}></SurveyPreview>
+                );
         }
+    }
     //}, [slide]);
 
     useEffect(() => {

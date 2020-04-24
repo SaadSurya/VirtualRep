@@ -39,11 +39,11 @@ const FeedbackModal = ({ show, setShow, onSubmit }) => {
                         </Form.Group>
                         <Form.Group >
                             <Form.Label>
-                                <h6>Was doctor convanced on prescribing product as a result of this call ?</h6>
+                                <h6>Was doctor convinced on prescribing product as a result of this call ?</h6>
                             </Form.Label>
-                            <Form.Check type="radio" name="convanced" label="Not Clear" />
-                            <Form.Check type="radio" name="convanced" label="Yes" />
-                            <Form.Check type="radio" name="convanced" label="No" />
+                            <Form.Check type="radio" name="convinced" label="Not Clear" />
+                            <Form.Check type="radio" name="convinced" label="Yes" />
+                            <Form.Check type="radio" name="convinced" label="No" />
                         </Form.Group>
 
                     </Form>
