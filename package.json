@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "concurrently \"NODE_ENV=development PORT=3000 nodemon\" \" cd app && PORT=3001 npm start\"",
+    "devw": "concurrently \"SET NODE_ENV=development && SET PORT=3000 && nodemon\" \" cd app && SET PORT=3001 && npm start\"",
     "build": "cd app && npm run build && cd .. && cp -a app/build/. public/ && mv public/index.html public/app.html"
   },
   "dependencies": {

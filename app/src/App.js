@@ -11,6 +11,10 @@ import Player from './components/Meeting/Player/Player';
 import Consent from './components/Meeting/Preview/Consent/Consent';
 import Logs from './components/Meeting/Logs/Logs';
 import ThankYou from './components/Meeting/Preview/ThankYou/ThankYou';
+import Company from './components/Company/Company';
+import Region from './components/Region/Region';
+import Zone from './components/Zone/Zone';
+import Territory from './components/Territory/Territory';
 
 function App() {
   return (
@@ -26,6 +30,11 @@ function App() {
         <PreviewLayoutRoute path="/meeting/preview" exact component={Preview} />
         <LoginLayoutRoute path="/meeting/preview/consent" component={Consent} />
         <AppLayoutRoute path="/meeting/logs" component={Logs} />
+        <AppLayoutRoute path="/company" component={Company} />
+        <AppLayoutRoute path="/Region" component={Region} />
+        <AppLayoutRoute path="/Zone" component={Zone} />
+        <AppLayoutRoute path="/Territory" component={Territory} />
+
       </Switch>
     </Router>
     // <Router>
