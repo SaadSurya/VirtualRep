@@ -2,24 +2,38 @@ const { getUserByUsername } = require('./user-service');
 const { getMeetingById } = require('./meeting-service');
 const ongoing_meetings = [];
 
-const initiateMeeting = (meetingId, username) => {
+const getOngoinMeetingById = (id) => {
+    return ongoing_meetings.find(meeting => meeting.id == id);
+}
+
+const initiateMeeting = (meetingId, username, socketId) => {
     console.log('initiate meeting called')
-    const user = getUserByUsername(username);
+    let user = getUserByUsername(username);
+    if(!user) {
+        user = { username, name: username}
+    }
+    thisUser = {...user};
+    thisUser.socketId = socketId;
     let meeting = getMeetingById(meetingId);
-    meeting = { ...meeting, users: [user], initiator: user, startTime: new Date() }
+    meeting = { ...meeting, users: [], initiator: thisUser, startTime: new Date() }
     //const meeting = { id: meetingId, users: [user], initiator: user, startTime: new Date(), currentSlideId: 1 }
     ongoing_meetings.push(meeting);
     return meeting;
 }
 
-const joinMeeting = (meetingId, username) => {
+const joinMeeting = (meetingId, username, socketId) => {
     console.log('join meeting called');
     let meeting = ongoing_meetings.find(meeting => meeting.id == meetingId);
     if (!meeting) {
         meeting = initiateMeeting(meetingId, username)
     }
-    const user = getUserByUsername(username);
-    meeting.users.push(user);
+    let user = getUserByUsername(username);
+    if(!user) {
+        user = { username, name: username}
+    }
+    thisUser = {...user};
+    thisUser.socketId = socketId;
+    meeting.users.push(thisUser);
     return meeting;
 }
 
@@ -54,4 +68,4 @@ const setSlideState = (meetingId, slideId, slideState) => {
     }
 }
 
-module.exports = { initiateMeeting, joinMeeting, endMeeting, changeSlide, setSlideState }
+module.exports = { getOngoinMeetingById, initiateMeeting, joinMeeting, endMeeting, changeSlide, setSlideState }

@@ -12,6 +12,8 @@ import Consent from './components/Meeting/Preview/Consent/Consent';
 import Logs from './components/Meeting/Logs/Logs';
 import ThankYou from './components/Meeting/Preview/ThankYou/ThankYou';
 
+//import '../public/adapter-latest';
+
 function App() {
   return (
     <Router>

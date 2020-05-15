@@ -5,7 +5,6 @@ import { Modal, Button, ListGroup, Col, Tab, Row, Sonnet, Card, Form } from 'rea
 import EmailEditor from './EmailEditor/EmailEditor';
 
 const SendEmailModal = ({ show, setShow }) => {
-    console.log(window.location);
     const submit = () => {
         setShow(false);
     };

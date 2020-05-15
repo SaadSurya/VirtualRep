@@ -5,8 +5,15 @@ import { SLIDE_TYPE } from '../../../services/slide-service';
 import ApiService from '../../../services/api-service';
 import SurveyPreview from './SurveyPreview/SurveyPreview';
 
+import './SlidePreview.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSquareFull } from '@fortawesome/free-solid-svg-icons';
+import { Button } from 'react-bootstrap';
+
 const SlidePreview = forwardRef(({ user, slide, slideState, onPlayVideo, onPauseVideo, onSeekVideo, onVideoFullscreenChange, onSlideStateChange }, ref) => {
     const [videoPlaying, setVideoPlaying] = useState(false);
+    const [userVideoFullscreen, setUserVideoFullscreen] = useState(false);
+    const [showUserVideo, setShowUserVideo] = useState(false);
     //const [slideTemplate, setSlideTemplate] = useState((<div>No preview available</div>));
     //const [currentSlideState, setCurrentSlideState] = useState(slideState);
 
@@ -14,6 +21,8 @@ const SlidePreview = forwardRef(({ user, slide, slideState, onPlayVideo, onPause
     let isVideo = false;
     //console.log("Slide Preview Rendered");
     let videoPlayer = useRef(null);
+    //let cameraPlayer = useRef(null);
+
     useImperativeHandle(ref, () => ({
 
         // changeSlideState: ({ slideId, slideState }) => {
@@ -60,12 +69,31 @@ const SlidePreview = forwardRef(({ user, slide, slideState, onPlayVideo, onPause
             }
         }
     }))
+
+    useEffect(() => {
+        if (user != null) {
+            setShowUserVideo(true);
+            // console.log(cameraPlayer.current)
+            // if (cameraPlayer.current) {
+            //     cameraPlayer.current.srcObject = user.stream;
+            //     console.log('streaming...', user.stream)
+            // }
+        }
+    }, [user]);
+
     let slideTemplate = (<div>Loading, Please Wait...</div>);
     //useEffect(() => {
     //console.log(slide);
-    if (user) {
+    if (user && userVideoFullscreen) {
         slideTemplate = (
-        <div>{user}</div>
+            <div className="stretched">
+                <video ref={video => {if(video) {video.srcObject = user.stream}}} autoPlay muted={true} id="large-video" className="stretched">
+                        </video>
+                <Button size="sm" variant="outline-secondary" className="fullscreen-button shadow"
+                    onClick={() => setUserVideoFullscreen(false)}>
+                    <FontAwesomeIcon icon={faSquareFull} />
+                </Button>
+            </div>
         )
     } else if (slide) {
         let slideUrl = ApiService.getBaseUrl() + slide.url;
@@ -138,7 +166,6 @@ const SlidePreview = forwardRef(({ user, slide, slideState, onPlayVideo, onPause
     //}, [slide]);
 
     useEffect(() => {
-        console.log(slideState);
         // //setCurrentSlideState(slideState);
         // console.log(slideTemplate.props);
         // if(slideTemplate.props.surveyState) {
@@ -170,8 +197,26 @@ const SlidePreview = forwardRef(({ user, slide, slideState, onPlayVideo, onPause
     }, [slide])
 
     return (
-        <div className="row h-100 justify-content-center align-items-center">
+        <div className="row h-100 justify-content-center align-items-center" style={{ position: "relative" }}>
             {slideTemplate}
+            {
+                user && showUserVideo && !userVideoFullscreen
+                    ? <div className="user-video-small shadow">
+                        <video ref={video => {if(video) {video.srcObject = user.stream}}} autoPlay muted={true} id="small-video" className="stretched">
+                        </video>
+                        {/* <span className="text-white-50 text-truncate ">&bnsp;{user.name}</span> */}
+                        {/* <Button size="xs" variant="outline-secondary" className="cross-button"
+                        onClick={() => setShowUserVideo(false)}>
+                    <FontAwesomeIcon icon={faWindowClose} />
+                    </Button> */}
+                        <Button size="xs" variant="outline-secondary" className="fullscreen-button shadow"
+                            onClick={() => setUserVideoFullscreen(true)}>
+                            <FontAwesomeIcon icon={faSquareFull} />
+                        </Button>
+                    </div>
+                    : null
+            }
+            
         </div>
     )
 })

@@ -8,9 +8,9 @@ const router = {
     configure: (app) => {
 
         //app.use('/', indexRouter);
-        app.use('/users', usersRouter);
-        app.use('/email', emailRouter);
-        app.use('/meeting', meetingRouter);
+        app.use('/api/v1/users', usersRouter);
+        app.use('/api/v1/email', emailRouter);
+        app.use('/api/v1/meeting', meetingRouter);
 
         /* GET React App */
         app.use(function (req, res, next) {

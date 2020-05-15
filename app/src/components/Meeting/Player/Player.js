@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, cloneElement } from 'react';
 import queryString from 'query-string';
 import io from 'socket.io-client';
+//import adapter from 'webrtc-adapter';
 
 import './Player.css';
 import SessionService from '../../../services/session-service';
@@ -12,32 +13,24 @@ import SlidePreview from '../SlidePreview/SlidePreview';
 import { Link } from 'react-router-dom';
 import ControlBar from './ControlBar/ControlBar';
 
-let socket;
+let socket, peerConnections = {}, receivingPeerConnections = {};
 
-var peerConnection = window.RTCPeerConnection ||
-    window.mozRTCPeerConnection ||
-    window.webkitRTCPeerConnection ||
-    window.msRTCPeerConnection;
+// var peerConnection = window.RTCPeerConnection ||
+//     window.mozRTCPeerConnection ||
+//     window.webkitRTCPeerConnection ||
+//     window.msRTCPeerConnection;
 
-var sessionDescription = window.RTCSessionDescription ||
-    window.mozRTCSessionDescription ||
-    window.webkitRTCSessionDescription ||
-    window.msRTCSessionDescription;
+// var sessionDescription = window.RTCSessionDescription ||
+//     window.mozRTCSessionDescription ||
+//     window.webkitRTCSessionDescription ||
+//     window.msRTCSessionDescription;
 
-navigator.getUserMedia = navigator.getUserMedia ||
+/* navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia ||
     navigator.mozGetUserMedia ||
-    navigator.msGetUserMedia;
-
-
-var pc = new peerConnection({
-    iceServers: [{
-        url: "stun:stun.services.mozilla.com",
-        username: "somename",
-        credential: "somecredentials"
-    }]
-});
-
+    navigator.msGetUserMedia ||
+    navigator.mediaDevices.getUserMedia; 
+ */
 
 const Player = ({ location }) => {
 
@@ -47,18 +40,49 @@ const Player = ({ location }) => {
     const [currentSlideState, setCurrentSlideState] = useState({});
     const [users, setUsers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const [streamAdded, setStreamAdded] = useState(false);
 
     const meetingRef = useRef(null);
     const currentSlideRef = useRef(null);
     const currentSlideStateRef = useRef({});
+    const usersRef = useRef([]);
+    const currentUserRef = useRef(null);
 
     meetingRef.current = meeting;
     currentSlideRef.current = currentSlide;
     currentSlideStateRef.current = currentSlideState;
+    usersRef.current = users;
+    currentUserRef.current = currentUser;
 
     const ENDPOINT = ApiService.getBaseUrl();
 
     const slidePreview = useRef(null);
+
+
+    useEffect(() => {
+        /* if (!streamAdded) {
+            const user = users.find(u => u.isThis);
+            if (user && user.stream) {
+                setStreamAdded(true);
+                Object.keys(peerConnections).forEach((key) => {
+                    user.stream.getTracks().forEach(track => {
+                        peerConnections[key].addTrack(track, user.stream);
+                        console.log('adding track', track);
+                    })
+                });
+                console.log(peerConnections);
+            }
+        } */
+        const thisUser = users.find(u => u.isThis);
+        if (thisUser && thisUser.stream) {
+            users.forEach(user => {
+                if (!peerConnections[user.socketId]) {
+                    initiatePeerConnection(user.socketId, thisUser.stream)
+                }
+            })
+        }
+
+    }, [users]);
 
     useEffect(() => {
 
@@ -70,10 +94,27 @@ const Player = ({ location }) => {
             socket.emit('join', { username: (SessionService.getSession() || {}).username || 'anonymous', meetingId: id }, (joinedMeeting) => {
                 let slide = joinedMeeting.slides.find(slide => slide.isCurrent);
                 slide = (slide ? slide : joinedMeeting.slides[0]);
+                const thisUser = joinedMeeting.users.find(u => u.socketId === socket.id);
+                thisUser.isThis = true;
+                if (thisUser.socketId === joinedMeeting.initiator.socketId) {
+                    thisUser.isInitiator = true;
+                }
                 setUsers(joinedMeeting.users);
+                setCurrentUser(thisUser);
                 setCurrentSlide(slide);
                 setCurrentSlideState(slide.state || {});
                 setMeeting(joinedMeeting);
+            });
+            socket.on('joined', ({ user }) => {
+                setUsers([...usersRef.current, user]);
+            });
+            socket.on('left', ({ user }) => {
+                const leftUser = usersRef.current.find(u => u.socketId === user.socketId);
+                usersRef.current.splice(usersRef.current.indexOf(leftUser), 1);
+                if (currentUserRef.current === leftUser) {
+                    setCurrentUser(null);
+                }
+                setUsers([...usersRef.current]);
             });
             socket.on('notification', ({ text }) => {
                 console.log(text);
@@ -117,33 +158,63 @@ const Player = ({ location }) => {
 
                 // }
             })
-            socket.on('offer-made', function (data) {
+            socket.on('offer-made', function ({ offer, by }) {
                 //offer = data.offer;
-
-                pc.setRemoteDescription(new sessionDescription(data.offer), function () {
-                    pc.createAnswer(function (answer) {
-                        pc.setLocalDescription(new sessionDescription(answer), function () {
-                            console.log('MAKE ANSWER');
+                let peerConnection;
+                if (!receivingPeerConnections[by]) {
+                    peerConnection = new RTCPeerConnection({
+                        iceServers: [
+                            { urls: ['stun:stun.l.google.com:19302'] },
+                            { urls: ['stun:stun1.l.google.com:19302'] },
+                            { urls: ['stun:stun2.l.google.com:19302'] },
+                            { urls: ['stun:stun3.l.google.com:19302'] },
+                            { urls: ['stun:stun4.l.google.com:19302'] },
+                            {
+                                "urls": [
+                                    "turn:13.250.13.83:3478?transport=udp"
+                                ],
+                                "username": "YzYNCouZM1mhqhmseWk6",
+                                "credential": "YzYNCouZM1mhqhmseWk6"
+                            }
+                        ]
+                    });
+                } else {
+                    peerConnection = receivingPeerConnections[by];
+                }
+                peerConnection.setRemoteDescription(new RTCSessionDescription(offer)).then(function () {
+                    peerConnection.createAnswer().then(function (answer) {
+                        peerConnection.setLocalDescription(new RTCSessionDescription(answer)).then(function () {
                             socket.emit('make-answer', {
                                 answer: answer,
-                                to: data.socket
+                                to: by
                             });
                         }, (err) => console.log(err));
                     }, (err) => console.log(err));
                 }, (err) => console.log(err));
-
+                peerConnection.ontrack = function (e) {
+                    const user = usersRef.current.find(u => u.socketId === by);
+                    user.stream = e.streams[0];
+                    setUsers([...usersRef.current]);
+                    //console.log(e.streams[0]); 
+                }
+                peerConnection.onicecandidate = (event) => {
+                    if (!event.candidate) return;
+                    socket.emit('ice-candidate', { candidate: event.candidate, to: by });
+                }
+                receivingPeerConnections[by] = peerConnection;
             });
-            //var answersFrom = {}, offer;
 
-            socket.on('answer-made', function (data) {
-                pc.setRemoteDescription(new sessionDescription(data.answer), function () {
-                    createOffer(data.socket);
-                    // document.getElementById(data.socket).setAttribute('class', 'active');
-                    // if (!answersFrom[data.socket]) {
-                    //     createOffer(data.socket);
-                    //     answersFrom[data.socket] = true;
-                    // }
+            socket.on('answer-made', function ({ answer, by }) {
+                const peerConnection = peerConnections[by];
+                peerConnection.setRemoteDescription(new RTCSessionDescription(answer)).then(function () {
+
                 }, (err) => console.log(err));
+            });
+
+            socket.on('ice-candidate', function ({ candidate, by }) {
+                const peerConnection = receivingPeerConnections[by] || peerConnections[by];
+                peerConnection.addIceCandidate(candidate);
+                console.log(candidate)
             });
         }
     }, []);
@@ -193,10 +264,45 @@ const Player = ({ location }) => {
         notifySlideChange(slide.id);
     }
 
-    const createOffer = (id) => {
-        pc.createOffer((offer) => {
-            pc.setLocalDescription(new sessionDescription(offer), () => {
-                socket.emit('make-offer', { offer, id });
+    const initiatePeerConnection = (socketId, stream) => {
+        const peerConnection = new RTCPeerConnection({
+            iceServers: [
+                { urls: ['stun:stun.l.google.com:19302'] },
+                { urls: ['stun:stun1.l.google.com:19302'] },
+                { urls: ['stun:stun2.l.google.com:19302'] },
+                { urls: ['stun:stun3.l.google.com:19302'] },
+                { urls: ['stun:stun4.l.google.com:19302'] },
+                {
+                    "urls": [
+                        "turn:13.250.13.83:3478?transport=udp"
+                    ],
+                    "username": "YzYNCouZM1mhqhmseWk6",
+                    "credential": "YzYNCouZM1mhqhmseWk6"
+                }
+            ]
+        });
+        createOffer(peerConnection, socketId, stream);
+        peerConnection.ontrack = function (e) {
+            const user = usersRef.current.find(u => u.socketId === socketId);
+            user.stream = e.streams[0];
+            setUsers([...usersRef.current]);
+            //console.log(e.streams[0]);
+        }
+        peerConnection.onicecandidate = (event) => {
+            if (!event.candidate) return;
+            socket.emit('ice-candidate', { candidate: event.candidate, to: socketId });
+        }
+        peerConnections[socketId] = peerConnection;
+    }
+
+    const createOffer = (peerConnection, socketId, stream) => {
+        stream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, stream);
+            console.log('adding track', track);
+        })
+        peerConnection.createOffer({ offerToReceiveVideo: true, offerToReceiveVideo: true }).then((offer) => {
+            peerConnection.setLocalDescription(new RTCSessionDescription(offer)).then(() => {
+                socket.emit('make-offer', { offer, to: socketId });
             }, (err) => console.log(err))
         }, (err) => console.log(err));
     }
@@ -208,7 +314,28 @@ const Player = ({ location }) => {
                     <div className="col-md-10 col-sm-10 h-100">
                         <div className="card h-100">
                             <div className="card-header card-header-sm">
-                                <ControlBar onEnd={notifyMeetingEnd} slide={currentSlide} users={users} onSelectUser={setCurrentUser} />
+                                <div className="audios">
+                                    {users
+                                        ? users.map(user =>
+                                            !user.isThis && user.stream && user.stream
+                                                ? (<video ref={video =>
+                                                    video && user.stream
+                                                        ? video.srcObject = user.stream
+                                                        : null
+                                                } autoPlay muted={false} />
+                                                )
+                                                : null
+                                        )
+                                        : null
+                                    }
+                                </div>
+                                <ControlBar
+                                    onEnd={notifyMeetingEnd}
+                                    slide={currentSlide}
+                                    users={users}
+                                    currentUser={currentUser}
+                                    onSelectUser={setCurrentUser}
+                                    setUsers={setUsers} />
                             </div>
                             <div className="card-body">
                                 <div className="container h-100">

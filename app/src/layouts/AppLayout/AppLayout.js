@@ -14,7 +14,6 @@ const AppLayout = ({ children, ...rest }) => {
 
   const toggleButtonClickHandler = (event) => {
     event.preventDefault();
-    console.log($(window).outerWidth());
     if ($(window).outerWidth() > 1194) {
       if (navShrinked) {
         setNavClass('');
